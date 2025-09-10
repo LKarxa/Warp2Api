@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  warp-bridge:
+    build: .
+    image: warp2api:latest
+    container_name: warp-bridge
+    ports:
+      - "8000:8000"
+    environment:
+      - SERVICE=bridge
+    # Pass your JWT tokens if you want to use your own quota
+    # env_file:
+    #   - .env
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  openai-compat:
+    image: warp2api:latest
+    container_name: openai-compat
+    depends_on:
+      warp-bridge:
+        condition: service_healthy
+    ports:
+      - "8010:8010"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8010
+      - WARP_BRIDGE_URL=http://warp-bridge:8000
+      - SERVICE=openai
+    # env_file:
+    #   - .env
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8010/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped

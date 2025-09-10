@@ -1,0 +1,33 @@
+# Version control
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+.venv
+venv
+env
+
+# Build artifacts
+*.egg-info
+dist
+build
+
+# Editor/OS
+.DS_Store
+.vscode
+.idea
+
+# Logs
+*.log
+warp_server.log
+
+# Caches
+.pytest_cache
+.mypy_cache
+*.sqlite3
+

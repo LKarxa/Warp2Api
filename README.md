@@ -62,6 +62,51 @@
    ```
    默认地址: `http://localhost:8010`
 
+### 使用 Docker 运行
+
+本仓库已提供 `Dockerfile` 与 `docker-compose.yml`，可一键在 Docker 中运行两个服务：
+
+1) 直接启动（推荐）
+
+```bash
+docker compose up -d --build
+```
+
+启动后：
+- Protobuf 桥接服务器: `http://localhost:8000`
+- OpenAI 兼容 API: `http://localhost:8010`
+
+OpenAI 兼容服务已在启动时自动等待桥接服务健康就绪。
+
+2) 独立运行单个容器
+
+仅运行桥接服务：
+```bash
+docker build -t warp2api:latest .
+docker run --rm -p 8000:8000 --name warp-bridge warp2api:latest
+```
+
+仅运行 OpenAI 兼容服务（需桥接服务可达）：
+```bash
+docker run --rm \
+  -e HOST=0.0.0.0 -e PORT=8010 \
+  -e WARP_BRIDGE_URL=http://host.docker.internal:8000 \
+  -p 8010:8010 \
+  --name openai-compat \
+  warp2api:latest python openai_compat.py
+```
+
+3) 传入 Warp 凭证（可选）
+
+你可以通过 `.env`（或在 compose 中的 `environment`）传入以下变量来使用你自己的订阅额度：
+
+```env
+WARP_JWT=your_jwt_token_here
+WARP_REFRESH_TOKEN=your_refresh_token_here
+```
+
+在 `docker-compose.yml` 中取消注释 `env_file: - .env` 即可。
+
 ### 使用 API
 
 两个服务器都运行后，您可以使用任何 OpenAI 兼容的客户端:
